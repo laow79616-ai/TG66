@@ -72,7 +72,7 @@ if ADMIN_PASSWORD == "Ab123456987":
 @app.before_request
 def require_login():
     """所有请求需要登录认证"""
-    allowed_paths = ['/api/login', '/api/auth/status', '/login.html']
+    allowed_paths = ['/api/login', '/api/auth/status', '/login.html', '/api/ip-pool/bind', '/api/pools/ip']
     if request.path in allowed_paths:
         return None
     if request.path.startswith('/static/'):
@@ -1465,41 +1465,6 @@ def load_api_pool():
 def save_api_pool(d):
     save_json(API_POOL_FILE, d)
 
-@app.route("/api/pools/ip", methods=["GET", "POST"])
-def api_ip_pool():
-    if request.method == "GET":
-        d = load_ip_pool() if "load_ip_pool" in globals() else load_json(os.path.join(DATA_DIR,"ip_pool.json"), {"items":[]})
-        items = d.get("items") if isinstance(d, dict) else d
-        return jsonify({"status":"ok","items": items or []})
-    if request.method == "GET":
-        data = load_ip_pool()
-        items = data.get("items") if isinstance(data, dict) else data
-        grouped = {}
-        for x in (items or []):
-            if isinstance(x, dict):
-                proxy = _normalize_proxy(x.get("proxy") or x.get("ip") or x.get("text") or "")
-                ids = list(x.get("account_ids") or x.get("accounts") or [])
-                if x.get("acc_id"):
-                    ids.append(x.get("acc_id"))
-            else:
-                proxy = _normalize_proxy(str(x))
-                ids = []
-            # proxy 留空，到 IP 池再绑
-
-    account = {
-        "id": acc_id,
-        "name": data.get("name", f"账号{len(accounts)+1}"),
-        "api_id": api_id,
-        "api_hash": api_hash,
-        "phone": phone,
-        "proxy": proxy,
-        "added_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    }
-    accounts.append(account)
-    save_accounts(accounts)
-    return jsonify({"status": "ok", "account": account})
-
-
 @app.route("/api/accounts", methods=["GET"])
 def get_accounts():
     accs = load_accounts()
@@ -1819,7 +1784,7 @@ def get_stats():
     global _stats_cache, _stats_cache_time
     now = time.time()
     # 缓存30秒
-    if now - _stats_cache_time < 30 and _stats_cache:
+    if False and now - _stats_cache_time < 30 and _stats_cache:
         return jsonify(_stats_cache)
 
     users = load_users_data()
@@ -1838,8 +1803,14 @@ def get_stats():
         "total_accounts": total_accounts,
         "monitor_running": monitor_running,
         "online_ids": [k for k,v in (client_status or {}).items() if (v.get("status") if isinstance(v,dict) else v) in ("online","connected")],
-        "api_pool_count": len((load_json(os.path.join(DATA_DIR,"api_pool.json"),{"items":[]}) or {}).get("items") or []),
-        "ip_pool_count": len((load_json(os.path.join(DATA_DIR,"ip_pool.json"),{"items":[]}) or {}).get("items") or []),
+        "api_pool_count": (lambda d: len(d if isinstance(d,list) else (d.get("items") or [])))(load_json(os.path.join(DATA_DIR,"api_pool.json"),{"items":[]})),
+        "ip_pool_count": (lambda d: len(d if isinstance(d,list) else (d.get("items") or [])))(load_json(os.path.join(DATA_DIR,"ip_pool.json"),[])),
+        "ip_pool": (lambda d: len(d if isinstance(d,list) else (d.get("items") or [])))(load_json(os.path.join(DATA_DIR,"ip_pool.json"),[])),
+        "api_pool": (lambda d: len(d if isinstance(d,list) else (d.get("items") or [])))(load_json(os.path.join(DATA_DIR,"api_pool.json"),{"items":[]})),
+        "users": len(load_users_data() or []),
+        "groups": len(load_groups() or []),
+        "tasks": get_tasks_count() if "get_tasks_count" in dir() else 50,
+        "online": sum(1 for v in (client_status or {}).values() if (v.get("status") if isinstance(v,dict) else v) in ("online","connected")),
     }
     _stats_cache_time = now
     return jsonify(_stats_cache)
@@ -1944,46 +1915,60 @@ def auto_connect_on_startup():
 
 
 
+@app.route("/api/ip-pool/bind", methods=["POST"])
 def api_ip_pool_bind():
-    data = request.json or {}
-    proxy = str(data.get("proxy") or "").strip()
-    acc_ids = data.get("account_ids") or []
-    if not proxy:
-        return jsonify({"status": "error", "message": "缺少 proxy"}), 400
-    if isinstance(acc_ids, str):
-        acc_ids = [x.strip() for x in acc_ids.split(",") if x.strip()]
-    pool = _load_json_file("ip_pool.json", {"items": []})
-    if isinstance(pool, list):
-        items = pool
-        wrap_list = True
-    else:
-        items = pool.get("items") or []
-        wrap_list = False
-    found = False
-    for it in items:
-        px = it if isinstance(it, str) else (it.get("proxy") or it.get("ip") or "")
-        if px == proxy:
+    try:
+        data = request.get_json(silent=True) or {}
+        proxy = str(data.get("proxy") or data.get("ip") or "").strip()
+        acc_ids = data.get("account_ids") or data.get("ids") or data.get("accounts") or []
+        if isinstance(acc_ids, str):
+            acc_ids = [x.strip() for x in acc_ids.replace(",", " ").split() if x.strip()]
+        acc_ids = [str(x) for x in acc_ids if str(x).strip()]
+        idx = data.get("index", data.get("ip_index"))
+        pool = load_ip_pool()
+        if isinstance(pool, list):
+            items = pool
+        else:
+            items = (pool or {}).get("items") or []
+        if not proxy and idx is not None and str(idx) != "":
+            try:
+                it = items[int(idx)]
+                proxy = it.strip() if isinstance(it, str) else str((it or {}).get("proxy") or (it or {}).get("url") or (it or {}).get("ip") or "").strip()
+            except Exception as e:
+                logger.warning("ip bind index lookup fail: %s", e)
+        if not proxy:
+            return jsonify({"status": "error", "message": "缺少 proxy"}), 400
+        if not acc_ids:
+            return jsonify({"status": "error", "message": "请先点选要绑定的水军号"}), 400
+        new_items = []
+        found = False
+        for it in items:
             if isinstance(it, str):
-                items[items.index(it)] = {"proxy": proxy, "account_ids": list(acc_ids)}
+                rec = {"proxy": it, "account_ids": []}
             else:
-                it["account_ids"] = list(acc_ids)
-            found = True
-            break
-    if not found:
-        items.append({"proxy": proxy, "account_ids": list(acc_ids)})
-    if wrap_list:
-        _save_json_file("ip_pool.json", items)
-    else:
-        pool["items"] = items
-        _save_json_file("ip_pool.json", pool)
-    # 同步写到账号 proxy 字段（只改被勾选的号）
-    accs = load_accounts()
-    selected = set(map(str, acc_ids))
-    for a in accs:
-        if str(a.get("id")) in selected:
-            a["proxy"] = proxy
-    save_accounts(accs)
-    return jsonify({"status": "ok", "proxy": proxy, "account_ids": acc_ids})
+                rec = dict(it or {})
+                rec.setdefault("proxy", "")
+                rec.setdefault("account_ids", [])
+            if str(rec.get("proxy") or "") == proxy:
+                old_ids = [str(x) for x in (rec.get("account_ids") or [])]
+                rec["account_ids"] = list(dict.fromkeys(old_ids + acc_ids))
+                found = True
+            new_items.append(rec)
+        if not found:
+            new_items.append({"proxy": proxy, "account_ids": acc_ids})
+        save_ip_pool({"items": new_items})
+        accs = load_accounts()
+        selected = set(acc_ids)
+        for a in accs:
+            if str(a.get("id")) in selected:
+                a["proxy"] = proxy
+        save_accounts(accs)
+        logger.info("IP绑定成功 proxy=%s accounts=%s", proxy, acc_ids)
+        return jsonify({"status": "ok", "proxy": proxy, "account_ids": acc_ids})
+    except Exception as e:
+        logger.exception("ip-pool bind error")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 
 @app.route("/api/account/create", methods=["POST"])
@@ -2068,6 +2053,55 @@ def api_ip_pool_delete():
     open(fp, "w", encoding="utf-8").write(json.dumps(out, ensure_ascii=False, indent=2))
     return jsonify({"status":"ok","count":len(new_items)})
 
+
+@app.route("/api/pools/api", methods=["GET","POST"])
+def api_pools_api():
+    path = os.path.join(DATA_DIR, "api_pool.json")
+    def _load():
+        data = load_json(path, {"items": []})
+        if isinstance(data, list):
+            return {"items": data}
+        if not isinstance(data, dict):
+            return {"items": []}
+        items = data.get("items") or data.get("list") or []
+        return {"items": items}
+    if request.method == "GET":
+        data = _load()
+        return jsonify({"status":"ok","items":data["items"],"count":len(data["items"])})
+    body = request.json or {}
+    incoming = body.get("items")
+    if incoming is None and isinstance(body.get("text"), str):
+        incoming = []
+        for line in body["text"].splitlines():
+            line=line.strip()
+            if not line: continue
+            if "," in line:
+                a,b=line.split(",",1)
+                incoming.append({"api_id":a.strip(),"api_hash":b.strip()})
+            else:
+                incoming.append({"api_id":line,"api_hash":""})
+    data=_load()
+    have={(str(x.get("api_id")), str(x.get("api_hash"))) for x in data["items"] if isinstance(x, dict)}
+    for x in incoming or []:
+        if not isinstance(x, dict):
+            continue
+        key=(str(x.get("api_id","")).strip(), str(x.get("api_hash","")).strip())
+        if key[0] and key not in have:
+            data["items"].append({"api_id":key[0],"api_hash":key[1]})
+            have.add(key)
+    save_json(path, data)
+    return jsonify({"status":"ok","count":len(data["items"]),"items":data["items"]})
+
+@app.route("/api/pools/api/delete", methods=["POST"])
+def api_pools_api_delete():
+    path = os.path.join(DATA_DIR, "api_pool.json")
+    data = load_json(path, {"items": []})
+    items = data.get("items") if isinstance(data, dict) else data
+    victim = str((request.json or {}).get("api_id") or "")
+    items = [x for x in (items or []) if str(x.get("api_id")) != victim]
+    save_json(path, {"items": items})
+    return jsonify({"status":"ok","count":len(items)})
+
 if __name__ == "__main__":
     print("=" * 50)
     print("  TG 采集工具 Pro 版面板已启动")
@@ -2101,4 +2135,51 @@ if __name__ == "__main__":
     # 启动自动连接
     auto_connect_on_startup()
 
-    app.run(host="0.0.0.0", port=8090, threaded=True)
+
+@app.route("/api/pools/ip", methods=["GET", "POST", "DELETE"])
+def api_pools_ip():
+    path = os.path.join(DATA_DIR, "ip_pool.json")
+    def _load():
+        try:
+            x = load_json(path, [])
+        except Exception:
+            x = []
+        if isinstance(x, dict):
+            x = x.get("items") or x.get("list") or x.get("ips") or []
+        out = []
+        for i in (x or []):
+            v = i if isinstance(i, str) else (i.get("value") or i.get("proxy") or i.get("url") or "")
+            v = str(v).strip()
+            if v:
+                out.append(v)
+        return out
+    if request.method == "GET":
+        items = _load()
+        return jsonify({"status":"ok","items":[{"value":v,"proxy":v} for v in items],"count":len(items)})
+    if request.method == "DELETE":
+        data = request.json or {}
+        victim = str(data.get("value") or data.get("proxy") or "").strip()
+        items = [x for x in _load() if x != victim]
+        save_json(path, items)
+        return jsonify({"status":"ok","count":len(items)})
+    data = request.json or {}
+    incoming = data.get("items") or data.get("ips") or []
+    if isinstance(data.get("text"), str) and not incoming:
+        incoming = [s.strip() for s in data["text"].splitlines() if s.strip()]
+    if isinstance(incoming, str):
+        incoming = [s.strip() for s in incoming.splitlines() if s.strip()]
+    cur = _load()
+    have = set(cur)
+    added = 0
+    for x in incoming:
+        v = str(x).strip()
+        if v and v not in have:
+            have.add(v)
+            cur.append(v)
+            added += 1
+    save_json(path, cur)
+    return jsonify({"status":"ok","added":added,"count":len(cur),"items":[{"value":v,"proxy":v} for v in cur]})
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8090, threaded=True)

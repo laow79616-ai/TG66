@@ -447,6 +447,8 @@ document.addEventListener("click",function(e){
                 <button class="btn btn-primary" onclick="assignPools('api')"><div id="api-pool-list"></div>
 一键分配当前池</button>
                 <button class="btn btn-success" onclick="assignPools('both')">IP+API全部分配</button>
+                <div id="api-pool-saved"></div>
+
             </div>
         </div>
 <script>
@@ -456,6 +458,7 @@ document.addEventListener("click",function(e){
                 const res = await fetchAPI('/api/pools/ip');
                 const data = await res.json();
                 const items = data.items || data.list || data.data || data.ips || data.proxies || [];
+                window.__ipPoolItems = items;
                 const text = data.text || data.content || (Array.isArray(items) ? items.map(x => (typeof x==='string'?x:(x.proxy||x.ip||x.url||''))).filter(Boolean).join('\n') : '');
                 const el = document.getElementById('ip-pool-text');
                 if (el) el.value = text;
@@ -470,24 +473,48 @@ document.addEventListener("click",function(e){
             alert('IP池已保存: '+(data.count||items.length));
         }
         async function loadApiPoolPage(){
-            try {
-                const res = await fetchAPI('/api/pools/api');
-                const data = await res.json();
-                const items = data.items || data.list || data.data || data.apis || [];
-                let text = data.text || data.content || '';
-                if (!text && Array.isArray(items)) {
-                    text = items.map(x => {
-                        if (typeof x === 'string') return x;
-                        const id = x.api_id || x.id || '';
-                        const h = x.api_hash || x.hash || '';
-                        return (id && h) ? (id + ',' + h) : (x.raw || '');
-                    }).filter(Boolean).join('\n');
-                }
-                const el = document.getElementById('api-pool-text');
-                if (el) el.value = text;
-            } catch (e) { console.error(e); }
+            const box=document.getElementById("api-pool-saved");
+            const ta=document.getElementById("api-pool-text");
+            if(ta){ ta.value=""; ta.placeholder="每行一对 api_id,api_hash（只填新增）"; }
+            try{
+                const res=await fetchAPI("/api/pools/api");
+                const data=(res&&res.json)?await res.json():res;
+                const list=Array.isArray(data)?data:(data.items||[]);
+                if(!box) return;
+                box.innerHTML="";
+                if(!list.length){ box.textContent="还没有保存的API"; return; }
+                const title=document.createElement("div");
+                title.style.margin="16px 0 8px";
+                title.style.fontWeight="700";
+                title.textContent="已保存 API（"+list.length+"）";
+                box.appendChild(title);
+                list.forEach(function(it){
+                    const id=String((it&&it.api_id)||"");
+                    const hs=String((it&&it.api_hash)||"");
+                    const row=document.createElement("div");
+                    row.style.cssText="display:flex;gap:10px;align-items:center;margin:8px 0;padding:8px;border:1px solid #e5e7eb;border-radius:8px;";
+                    const code=document.createElement("code");
+                    code.style.flex="1";
+                    code.style.wordBreak="break-all";
+                    code.textContent=id+(hs?(", "+hs):"");
+                    const btn=document.createElement("button");
+                    btn.className="btn btn-sm btn-danger";
+                    btn.textContent="删除";
+                    btn.onclick=function(){ deleteSavedApi(id); };
+                    row.appendChild(code);
+                    row.appendChild(btn);
+                    box.appendChild(row);
+                });
+            }catch(e){
+                if(box) box.textContent="加载失败";
+            }
         }
-        
+        async function deleteSavedApi(api_id){
+            if(!confirm("删除这条 API？")) return;
+            await fetchAPI("/api/pools/api/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({api_id:api_id})});
+            loadApiPoolPage();
+        }
+
         async function saveApiPoolPage(){
             const ta=document.getElementById('api-pool-text');
             const items=(ta.value||'').split('\n').map(s=>s.trim()).filter(Boolean);
@@ -519,7 +546,7 @@ document.addEventListener("click",function(e){
         }
         
         async function saveIpPool(){ const v=document.getElementById('ip-pool-text').value; await fetchAPI('/api/pools/ip',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:v})}); alert('已保存IP池'); }
-        async function saveApiPool(){ const v=document.getElementById('api-pool-text').value; await fetchAPI('/api/pools/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:v})}); alert('已保存API池'); }
+        async function saveApiPool(){ const v=document.getElementById('api-pool-text').value; await fetchAPI('/api/pools/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:v})}); alert('已保存API池');loadApiPoolPage(); }
         function fetchAPI(url, options = {}, timeout = 120000) {
             return Promise.race([
                 fetch(url, options),
@@ -1368,7 +1395,9 @@ document.addEventListener("click",function(e){
                     headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({index:ipIndex, account_ids:ids, ids:ids, proxy:proxy})
                 });
-                const d=await r.json();
+                const txt=await r.text();
+                let d={};
+                try{ d=JSON.parse(txt); }catch(e){ alert('绑定失败: 接口返回了网页而不是JSON，状态'+r.status); return; }
                 if(d.status==='ok' || d.status==='success'){
                     alert('已把 '+ids.length+' 个号绑到该IP');
                     if (typeof loadIpPoolPage==='function') await loadIpPoolPage();
