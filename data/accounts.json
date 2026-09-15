@@ -180,15 +180,6 @@
     "added_at": "2026-09-10 13:56:46"
   },
   {
-    "id": "acc_1789048801626",
-    "name": "21",
-    "api_id": "32546558",
-    "api_hash": "920b985d91af200a2f1128da6ca464ab",
-    "phone": "+16302516904",
-    "proxy": "63.164.210.59:38499:sy9uYRvAYKJq:rgTFp0MgZ1IH",
-    "added_at": "2026-09-10 14:00:01"
-  },
-  {
     "id": "acc_1789048888274",
     "name": "22",
     "api_id": "39819177",
@@ -268,5 +259,194 @@
     "phone": "+918391995532",
     "proxy": "63.164.210.69:44887:c4WRVGO9ZwkJ:cZoRre2pYunx",
     "added_at": "2026-09-10 14:13:59"
+  },
+  {
+    "id": "acc_1789059159694",
+    "name": "31",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "+15138104899",
+    "proxy": "63.164.210.75:37973:bZoDlV5OtCzL:JKd4taqncfIj",
+    "added_at": "2026-09-10 16:52:39"
+  },
+  {
+    "id": "acc_1789059232407",
+    "name": "32",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "+19893187893",
+    "proxy": "63.164.210.75:37973:bZoDlV5OtCzL:JKd4taqncfIj",
+    "added_at": "2026-09-10 16:53:52"
+  },
+  {
+    "id": "acc_1789060565701",
+    "name": "33",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "+17605399961",
+    "proxy": "63.164.210.75:37973:bZoDlV5OtCzL:JKd4taqncfIj",
+    "added_at": "2026-09-10 17:16:05"
+  },
+  {
+    "id": "acc_1789060577552",
+    "name": "34",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "+16502603375",
+    "proxy": "63.164.210.75:37973:bZoDlV5OtCzL:JKd4taqncfIj",
+    "added_at": "2026-09-10 17:16:17"
+  },
+  {
+    "id": "acc_1789060588585",
+    "name": "35",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "+919216400587",
+    "proxy": "63.164.210.75:37973:bZoDlV5OtCzL:JKd4taqncfIj",
+    "added_at": "2026-09-10 17:16:28"
+  },
+  {
+    "id": "acc_1789061026966",
+    "name": "36",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "+15809540404",
+    "proxy": "209.227.56.211:33469:0NoKM2JwtaHV:lOy11776fwbe",
+    "added_at": "2026-09-10 17:23:46"
+  },
+  {
+    "id": "acc_1789061209778",
+    "name": "37",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "+16827108686",
+    "proxy": "209.227.56.211:33469:0NoKM2JwtaHV:lOy11776fwbe",
+    "added_at": "2026-09-10 17:26:49"
+  },
+  {
+    "id": "acc_1789061282482",
+    "name": "38",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "+19284632336",
+    "proxy": "209.227.56.211:33469:0NoKM2JwtaHV:lOy11776fwbe",
+    "added_at": "2026-09-10 17:28:02"
+  },
+  {
+    "id": "acc_1789061340423",
+    "name": "39",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "+12676973430",
+    "proxy": "209.227.56.211:33469:0NoKM2JwtaHV:lOy11776fwbe",
+    "added_at": "2026-09-10 17:29:00"
+  },
+  {
+    "id": "acc_1789061399985",
+    "name": "40",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "+18567359522",
+    "proxy": "209.227.56.211:33469:0NoKM2JwtaHV:lOy11776fwbe",
+    "added_at": "2026-09-10 17:29:59"
+  },
+  {
+    "id": "acc_1789061524958",
+    "name": "41",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "601164084680",
+    "proxy": "209.227.56.214:39791:GvO6DOQR82u9:ZlACSjHHG91W",
+    "added_at": "2026-09-10 17:32:04"
+  },
+  {
+    "id": "acc_1789061592312",
+    "name": "42",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "17252679301",
+    "proxy": "209.227.56.214:39791:GvO6DOQR82u9:ZlACSjHHG91W",
+    "added_at": "2026-09-10 17:33:12"
+  },
+  {
+    "id": "acc_1789061669207",
+    "name": "43",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "16602923634",
+    "proxy": "209.227.56.214:39791:GvO6DOQR82u9:ZlACSjHHG91W",
+    "added_at": "2026-09-10 17:34:29"
+  },
+  {
+    "id": "acc_1789061738778",
+    "name": "44",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "14015323701",
+    "proxy": "209.227.56.214:39791:GvO6DOQR82u9:ZlACSjHHG91W",
+    "added_at": "2026-09-10 17:35:38"
+  },
+  {
+    "id": "acc_1789061800617",
+    "name": "45",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "15079022650",
+    "proxy": "209.227.56.214:39791:GvO6DOQR82u9:ZlACSjHHG91W",
+    "added_at": "2026-09-10 17:36:40"
+  },
+  {
+    "id": "acc_1789061987131",
+    "name": "46",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "17194352987",
+    "proxy": "209.227.56.215:34375:Xcg3sG19XGxC:aXLJjSjODUBV",
+    "added_at": "2026-09-10 17:39:47"
+  },
+  {
+    "id": "acc_1789062043078",
+    "name": "47",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "17372901278",
+    "proxy": "209.227.56.215:34375:Xcg3sG19XGxC:aXLJjSjODUBV",
+    "added_at": "2026-09-10 17:40:43"
+  },
+  {
+    "id": "acc_1789062097359",
+    "name": "48",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "19316167923",
+    "proxy": "209.227.56.215:34375:Xcg3sG19XGxC:aXLJjSjODUBV",
+    "added_at": "2026-09-10 17:41:37"
+  },
+  {
+    "id": "acc_1789062191886",
+    "name": "49",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "919962157387",
+    "proxy": "209.227.56.215:34375:Xcg3sG19XGxC:aXLJjSjODUBV",
+    "added_at": "2026-09-10 17:43:11"
+  },
+  {
+    "id": "acc_1789062254931",
+    "name": "50",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "919702525567",
+    "proxy": "209.227.56.215:34375:Xcg3sG19XGxC:aXLJjSjODUBV",
+    "added_at": "2026-09-10 17:44:14"
+  },
+  {
+    "id": "acc_1789062520961",
+    "name": "21",
+    "api_id": "36477774",
+    "api_hash": "3202ce7116b2df1cc1c8a21fd52ebeff",
+    "phone": "917618657781",
+    "proxy": "63.164.210.59:38499:sy9uYRvAYKJq:rgTFp0MgZ1IH",
+    "added_at": "2026-09-10 17:48:40"
   }
 ]

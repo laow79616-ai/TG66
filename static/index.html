@@ -471,6 +471,8 @@ document.addEventListener("click",function(e){
             const res=await fetchAPI('/api/pools/ip',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items})});
             const data=await res.json();
             alert('IP池已保存: '+(data.count||items.length));
+            if (typeof drawSavedIps === 'function') await drawSavedIps();
+            if (typeof loadIpPoolPage === 'function') await loadIpPoolPage();
         }
         async function loadApiPoolPage(){
             const box=document.getElementById("api-pool-saved");
@@ -521,6 +523,7 @@ document.addEventListener("click",function(e){
             const res=await fetchAPI('/api/pools/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items})});
             const data=await res.json();
             alert('API池已保存: '+(data.count||items.length));
+            if (typeof loadApiPoolPage === 'function') await loadApiPoolPage();
         }
 
         let currentCodeAccountId = null;

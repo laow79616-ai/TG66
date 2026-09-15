@@ -1,7 +1,11 @@
-data/*.session
-data/*.session-journal
-data/*.bak*
-*.bak*
 __pycache__/
 *.pyc
+*.session
+*.session-journal
+data/users.json
+data/tasks.json
+data/*.session
 .env
+*.bak*
+static/*.bak*
+app.py.bak*
